@@ -12,7 +12,12 @@ Todos.TodosController = Ember.ArrayController.extend({
 
       this.set("newTitle", "");
       todo.save();
-    }
+    },
+    clearCompleted: function() {
+      var completed = this.filterBy("isCompleted", true);
+      completed.invoke("deleteRecord");
+      completed.invoke("save");
+    },
   },
   
   remaining: function() {
@@ -25,5 +30,21 @@ Todos.TodosController = Ember.ArrayController.extend({
 
   completedTotal: function() {
     return this.get("model").get("length") - this.get("remaining");
-  }.property("remaining")
+  }.property("remaining"),
+
+  hasCompleted: function() {
+    return this.get("completedTotal") > 0;
+  }.property("completedTotal"),
+
+  allAreDone: function(key, value) {
+    if (value === undefined) {
+      // this just populates the current value of the checkbox
+      return this.get("length") && this.isEvery("isCompleted");
+    } else {
+      // value of true/false means user clicked checkbox
+      this.setEach("isCompleted", value);
+      this.invoke("save");
+      return value;
+    }
+  }.property("@each.isCompleted"),
 });
